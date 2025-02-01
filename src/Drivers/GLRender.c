@@ -331,6 +331,7 @@ void GLRender_PresentFramebuffer(void)
 	int zvw = (isHQ ? 2 : 1) * vw;
 	int zvh = (isHQ ? 2 : 1) * vh;
 
+#ifndef __vita__
 	//-------------------------------------------------------------------------
 	// Update PBO
 
@@ -351,6 +352,7 @@ void GLRender_PresentFramebuffer(void)
 
 	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
 	CHECK_GL_ERROR();
+#endif
 
 	//-------------------------------------------------------------------------
 	// Draw the quad
@@ -369,16 +371,21 @@ void GLRender_PresentFramebuffer(void)
 	}
 
 	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
+#ifdef __vita__
+	void *mappedBuffer = vglGetTexDataPointer(GL_TEXTURE_2D);
+	ConvertFramebufferMT(mappedBuffer);
+#endif
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 					gEffectiveScalingType == kScaling_PixelPerfect ? GL_NEAREST : GL_LINEAR);
 
+#ifndef __vita__
 #if !DEFERRED_TEX_UPDATE
 	// Update the texture
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, zvw, zvh, kFramePixelFormat, kFramePixelType, NULL);
 	CHECK_GL_ERROR();
 #endif
-
+#endif
 	const float umax = vw * (1.0f / kFrameTextureWidth);
 	const float vmax = vh * (1.0f / kFrameTextureHeight);
 
@@ -393,13 +400,14 @@ void GLRender_PresentFramebuffer(void)
 	CHECK_GL_ERROR();
 
 	SDL_GL_SwapWindow(gSDLWindow);
-
+#ifndef __vita__
 #if DEFERRED_TEX_UPDATE
 	//-------------------------------------------------------------------------
 	// Update texture
 
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, zvw, zvh, kFramePixelFormat, kFramePixelType, NULL);
 	CHECK_GL_ERROR();
+#endif
 #endif
 }
 

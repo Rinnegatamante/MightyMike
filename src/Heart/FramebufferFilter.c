@@ -10,11 +10,18 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSm
 
 void IndexedFramebufferToColor_NoFilter(color_t* color, int firstRow, int numRows)
 {
+#ifndef __vita__
 	color						= color + firstRow * VISIBLE_WIDTH;
+#else	
+	color_t *start = color;
+#endif
 	const uint8_t* indexed		= gIndexedFramebuffer + firstRow * VISIBLE_WIDTH;
 
 	for (int y = 0; y < numRows; y++)
 	{
+#ifdef __vita__
+		color						= start + (firstRow + y) * 1024;
+#endif
 		for (int x = 0; x < VISIBLE_WIDTH; x++)
 		{
 			*(color++) = gGamePalette.finalColorsXX[*(indexed++)];
@@ -24,7 +31,11 @@ void IndexedFramebufferToColor_NoFilter(color_t* color, int firstRow, int numRow
 
 void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, int firstRow, int numRows)
 {
+#ifndef __vita__
 	color						= color + firstRow * VISIBLE_WIDTH;
+#else
+	color_t *start = color;
+#endif
 	const uint8_t* indexed		= gIndexedFramebuffer + firstRow * VISIBLE_WIDTH;
 	uint8_t* smearFlags			= gRowDitherStrides + threadNum * VISIBLE_WIDTH;
 
@@ -36,6 +47,9 @@ void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, in
 
 	for (int y = 0; y < numRows; y++)
 	{
+#ifdef __vita__
+		color						= start + (firstRow + y) * 1024;
+#endif
 		FilterDithering_Row(indexed, smearFlags);
 
 		for (int x = 0; x < VISIBLE_WIDTH-1; x++)

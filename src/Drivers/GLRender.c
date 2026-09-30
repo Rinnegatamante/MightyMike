@@ -38,6 +38,11 @@ PFNGLBUFFERDATAARBPROC glBufferDataARB;
 PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
 #endif
 
+#ifdef __vita__
+// SDL_opengl.h conflicts with several vitaGL OpenGL declarations.
+void *vglGetTexDataPointer(GLenum target);
+#endif
+
 // Marginal FPS increase at the cost of 1 frame of latency
 #define DEFERRED_TEX_UPDATE 0
 
